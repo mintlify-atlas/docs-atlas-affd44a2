@@ -1,0 +1,559 @@
+---
+title: 'Random Sampling'
+description: 'Random sampling functions for generating pseudo-random numbers in MLX'
+---
+
+## Overview
+
+Random sampling functions in MLX use an implicit global PRNG state by default. However, all functions take an optional `key` keyword argument for when more fine-grained control or explicit state management is needed.
+
+MLX follows [JAX's PRNG design](https://jax.readthedocs.io/en/latest/jep/263-prng.html) using a splittable version of Threefry, which is a counter-based PRNG.
+
+## Basic Usage
+
+Generate random numbers using the implicit global state:
+
+```python
+import mlx.core as mx
+
+for _ in range(3):
+    print(mx.random.uniform())
+```
+
+Or use explicit key management:
+
+```python
+import mlx.core as mx
+
+key = mx.random.key(0)
+for _ in range(3):
+    print(mx.random.uniform(key=key))  # Same number each time
+```
+
+## Key Management
+
+### key
+
+```python
+mx.random.key(seed: int) -> array
+```
+
+Get a PRNG key from a seed.
+
+<ParamField path="seed" type="int" required>
+  Seed value for the PRNG
+</ParamField>
+
+**Returns:** Array representing the PRNG key
+
+**Example:**
+```python
+key = mx.random.key(0)
+```
+
+### seed
+
+```python
+mx.random.seed(seed: int) -> None
+```
+
+Seed the default global PRNG state.
+
+<ParamField path="seed" type="int" required>
+  Seed value for the global PRNG
+</ParamField>
+
+**Example:**
+```python
+mx.random.seed(42)
+```
+
+### split
+
+```python
+mx.random.split(key: array, num: int = 2, stream: StreamOrDevice = None) -> array
+```
+
+Split the RNG key into multiple keys.
+
+<ParamField path="key" type="array" required>
+  The PRNG key to split
+</ParamField>
+
+<ParamField path="num" type="int" default="2">
+  Number of keys to generate. If `num=2`, returns a tuple of two keys. Otherwise returns an array of shape `(num, 2)`.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Tuple of two arrays (if num=2) or array of shape `(num, 2)`
+
+**Example:**
+```python
+key = mx.random.key(0)
+k1, k2 = mx.random.split(key)
+keys = mx.random.split(key, 10)  # Shape: (10, 2)
+```
+
+## Continuous Distributions
+
+### uniform
+
+```python
+mx.random.uniform(
+    low: float | array = 0.0,
+    high: float | array = 1.0,
+    shape: tuple = (),
+    dtype: Dtype = float32,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Generate uniformly distributed random numbers.
+
+<ParamField path="low" type="float | array" default="0.0">
+  Lower bound of the distribution
+</ParamField>
+
+<ParamField path="high" type="float | array" default="1.0">
+  Upper bound of the distribution
+</ParamField>
+
+<ParamField path="shape" type="tuple" default="()">
+  Shape of the output array
+</ParamField>
+
+<ParamField path="dtype" type="Dtype" default="float32">
+  Data type of the output
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Array of uniformly distributed random values
+
+**Example:**
+```python
+# Scalar value between 0 and 1
+x = mx.random.uniform()
+
+# Array of shape (2, 3)
+x = mx.random.uniform(shape=(2, 3))
+
+# Values between -1 and 5
+x = mx.random.uniform(low=-1, high=5, shape=(1000,))
+```
+
+### normal
+
+```python
+mx.random.normal(
+    loc: float = 0.0,
+    scale: float = 1.0,
+    shape: tuple = (),
+    dtype: Dtype = float32,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Generate samples from a normal (Gaussian) distribution.
+
+<ParamField path="loc" type="float" default="0.0">
+  Mean of the distribution
+</ParamField>
+
+<ParamField path="scale" type="float" default="1.0">
+  Standard deviation of the distribution
+</ParamField>
+
+<ParamField path="shape" type="tuple" default="()">
+  Shape of the output array
+</ParamField>
+
+<ParamField path="dtype" type="Dtype" default="float32">
+  Data type of the output
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Array of normally distributed random values
+
+**Example:**
+```python
+# Standard normal
+x = mx.random.normal(shape=(2, 3))
+
+# Mean 1.0, std 2.0
+x = mx.random.normal(loc=1.0, scale=2.0, shape=(100,))
+```
+
+### multivariate_normal
+
+```python
+mx.random.multivariate_normal(
+    mean: array,
+    cov: array,
+    shape: tuple = (),
+    dtype: Dtype = float32,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Generate samples from a multivariate normal distribution.
+
+<ParamField path="mean" type="array" required>
+  Mean vector of the distribution
+</ParamField>
+
+<ParamField path="cov" type="array" required>
+  Covariance matrix of the distribution
+</ParamField>
+
+<ParamField path="shape" type="tuple" default="()">
+  Shape of the output array
+</ParamField>
+
+<ParamField path="dtype" type="Dtype" default="float32">
+  Data type of the output (must be float32)
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Array of samples from the multivariate normal distribution
+
+**Example:**
+```python
+mean = mx.array([0, 0])
+cov = mx.array([[1, 0], [0, 1]])
+x = mx.random.multivariate_normal(mean, cov)
+```
+
+### laplace
+
+```python
+mx.random.laplace(
+    loc: float = 0.0,
+    scale: float = 1.0,
+    shape: tuple = (),
+    dtype: Dtype = float32,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Generate samples from the Laplace distribution.
+
+<ParamField path="loc" type="float" default="0.0">
+  Location parameter (mean) of the distribution
+</ParamField>
+
+<ParamField path="scale" type="float" default="1.0">
+  Scale parameter of the distribution
+</ParamField>
+
+<ParamField path="shape" type="tuple" default="()">
+  Shape of the output array
+</ParamField>
+
+<ParamField path="dtype" type="Dtype" default="float32">
+  Data type of the output
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Array of samples from the Laplace distribution
+
+**Example:**
+```python
+x = mx.random.laplace(shape=(100,))
+```
+
+### truncated_normal
+
+```python
+mx.random.truncated_normal(
+    lower: array | float,
+    upper: array | float,
+    shape: tuple = None,
+    dtype: Dtype = float32,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Generate samples from a truncated normal distribution.
+
+<ParamField path="lower" type="array | float" required>
+  Lower bound for truncation
+</ParamField>
+
+<ParamField path="upper" type="array | float" required>
+  Upper bound for truncation
+</ParamField>
+
+<ParamField path="shape" type="tuple" default="None">
+  Shape of the output array. If None, inferred from lower/upper.
+</ParamField>
+
+<ParamField path="dtype" type="Dtype" default="float32">
+  Data type of the output
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Array of samples from the truncated normal distribution
+
+**Example:**
+```python
+x = mx.random.truncated_normal(lower=-2, upper=2, shape=(100,))
+```
+
+### gumbel
+
+```python
+mx.random.gumbel(
+    shape: tuple = (),
+    dtype: Dtype = float32,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Generate samples from the Gumbel distribution.
+
+<ParamField path="shape" type="tuple" default="()">
+  Shape of the output array
+</ParamField>
+
+<ParamField path="dtype" type="Dtype" default="float32">
+  Data type of the output
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Array of samples from the Gumbel distribution
+
+**Example:**
+```python
+x = mx.random.gumbel(shape=(100,))
+```
+
+## Discrete Distributions
+
+### randint
+
+```python
+mx.random.randint(
+    low: int | array,
+    high: int | array,
+    shape: tuple = (),
+    dtype: Dtype = int32,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Generate random integers uniformly from the range `[low, high)`.
+
+<ParamField path="low" type="int | array" required>
+  Lower bound (inclusive)
+</ParamField>
+
+<ParamField path="high" type="int | array" required>
+  Upper bound (exclusive)
+</ParamField>
+
+<ParamField path="shape" type="tuple" default="()">
+  Shape of the output array
+</ParamField>
+
+<ParamField path="dtype" type="Dtype" default="int32">
+  Data type of the output
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Array of random integers
+
+**Example:**
+```python
+# Integers from 0 to 9
+x = mx.random.randint(0, 10, shape=(100,))
+```
+
+### bernoulli
+
+```python
+mx.random.bernoulli(
+    p: float | array = 0.5,
+    shape: tuple = None,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Generate binary random variables with probability `p` of being True.
+
+<ParamField path="p" type="float | array" default="0.5">
+  Probability of generating True (1)
+</ParamField>
+
+<ParamField path="shape" type="tuple" default="None">
+  Shape of the output array. If None, inferred from p.
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Array of boolean values
+
+**Example:**
+```python
+# Coin flips
+x = mx.random.bernoulli(p=0.5, shape=(100,))
+
+# 30% chance of True
+x = mx.random.bernoulli(p=0.3, shape=(100,))
+```
+
+### categorical
+
+```python
+mx.random.categorical(
+    logits: array,
+    axis: int = -1,
+    shape: tuple = None,
+    num_samples: int = None,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Sample from a categorical distribution.
+
+<ParamField path="logits" type="array" required>
+  Unnormalized log probabilities for each category
+</ParamField>
+
+<ParamField path="axis" type="int" default="-1">
+  Axis along which to sample
+</ParamField>
+
+<ParamField path="shape" type="tuple" default="None">
+  Shape of the output array
+</ParamField>
+
+<ParamField path="num_samples" type="int" default="None">
+  Number of samples to draw. Alternative to specifying shape.
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Array of categorical samples (indices)
+
+**Example:**
+```python
+# Sample from 3 categories with equal probability
+logits = mx.array([0.0, 0.0, 0.0])
+x = mx.random.categorical(logits, num_samples=100)
+```
+
+## Permutations
+
+### permutation
+
+```python
+mx.random.permutation(
+    x: array | int,
+    axis: int = 0,
+    key: array | None = None,
+    stream: StreamOrDevice = None
+) -> array
+```
+
+Randomly permute elements.
+
+<ParamField path="x" type="array | int" required>
+  If an array, permute its elements along the given axis. If an integer, equivalent to `permutation(mx.arange(x))`.
+</ParamField>
+
+<ParamField path="axis" type="int" default="0">
+  Axis along which to permute. Only used if x is an array.
+</ParamField>
+
+<ParamField path="key" type="array | None" default="None">
+  PRNG key. If None, uses the global state.
+</ParamField>
+
+<ParamField path="stream" type="StreamOrDevice" default="None">
+  Stream or device to use
+</ParamField>
+
+**Returns:** Permuted array
+
+**Example:**
+```python
+# Random permutation of 0 to 9
+x = mx.random.permutation(10)
+
+# Shuffle array rows
+arr = mx.array([[1, 2], [3, 4], [5, 6]])
+shuffled = mx.random.permutation(arr, axis=0)
+```

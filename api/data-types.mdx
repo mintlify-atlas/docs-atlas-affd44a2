@@ -1,0 +1,402 @@
+---
+title: Data Types
+description: Supported data types and type inspection utilities in MLX
+---
+
+MLX supports a variety of numeric data types for arrays. The default floating point type is `float32` and the default integer type is `int32`.
+
+## Supported Data Types
+
+### Boolean Type
+
+#### bool_
+
+Boolean data type representing `True` or `False` values.
+
+```python
+import mlx.core as mx
+
+a = mx.array([True, False, True], dtype=mx.bool_)
+print(a.dtype)  # mlx.core.bool
+print(a.itemsize)  # 1 byte
+```
+
+**Size:** 1 byte
+
+### Integer Types
+
+#### int8
+
+8-bit signed integer.
+
+**Range:** -128 to 127  
+**Size:** 1 byte
+
+```python
+import mlx.core as mx
+
+a = mx.array([1, 2, 3], dtype=mx.int8)
+```
+
+#### int16
+
+16-bit signed integer.
+
+**Range:** -32,768 to 32,767  
+**Size:** 2 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([1000, 2000, 3000], dtype=mx.int16)
+```
+
+#### int32
+
+32-bit signed integer. This is the default integer type.
+
+**Range:** -2,147,483,648 to 2,147,483,647  
+**Size:** 4 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([1, 2, 3])  # Defaults to int32
+print(a.dtype)  # mlx.core.int32
+```
+
+#### int64
+
+64-bit signed integer.
+
+**Range:** -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807  
+**Size:** 8 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([1000000000, 2000000000], dtype=mx.int64)
+```
+
+### Unsigned Integer Types
+
+#### uint8
+
+8-bit unsigned integer.
+
+**Range:** 0 to 255  
+**Size:** 1 byte
+
+```python
+import mlx.core as mx
+
+a = mx.array([0, 128, 255], dtype=mx.uint8)
+```
+
+#### uint16
+
+16-bit unsigned integer.
+
+**Range:** 0 to 65,535  
+**Size:** 2 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([0, 32768, 65535], dtype=mx.uint16)
+```
+
+#### uint32
+
+32-bit unsigned integer.
+
+**Range:** 0 to 4,294,967,295  
+**Size:** 4 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([0, 1000000, 4000000000], dtype=mx.uint32)
+```
+
+#### uint64
+
+64-bit unsigned integer.
+
+**Range:** 0 to 18,446,744,073,709,551,615  
+**Size:** 8 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([0, 10000000000], dtype=mx.uint64)
+```
+
+### Floating Point Types
+
+#### float16
+
+16-bit IEEE 754 floating point (half precision).
+
+**Format:** 1 sign bit, 5 exponent bits, 10 mantissa bits  
+**Size:** 2 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([1.5, 2.5, 3.5], dtype=mx.float16)
+```
+
+#### bfloat16
+
+16-bit brain floating point.
+
+**Format:** 1 sign bit, 8 exponent bits, 7 mantissa bits  
+**Size:** 2 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([1.5, 2.5, 3.5], dtype=mx.bfloat16)
+```
+
+<Note>
+  bfloat16 has the same exponent range as float32 but with reduced precision, making it useful for machine learning applications.
+</Note>
+
+#### float32
+
+32-bit IEEE 754 floating point (single precision). This is the default floating point type.
+
+**Format:** 1 sign bit, 8 exponent bits, 23 mantissa bits  
+**Size:** 4 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([1.0, 2.0, 3.0])  # Defaults to float32
+print(a.dtype)  # mlx.core.float32
+```
+
+#### float64
+
+64-bit IEEE 754 floating point (double precision).
+
+**Format:** 1 sign bit, 11 exponent bits, 52 mantissa bits  
+**Size:** 8 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([1.0, 2.0, 3.0], dtype=mx.float64)
+```
+
+<Warning>
+  Arrays with type `float64` only work with CPU operations. Using `float64` arrays on the GPU will result in an exception.
+</Warning>
+
+### Complex Types
+
+#### complex64
+
+64-bit complex floating point number.
+
+**Format:** Two 32-bit floats (real and imaginary parts)  
+**Size:** 8 bytes
+
+```python
+import mlx.core as mx
+
+a = mx.array([1+2j, 3+4j], dtype=mx.complex64)
+print(a.real)  # array([1, 3], dtype=float32)
+print(a.imag)  # array([2, 4], dtype=float32)
+```
+
+## Data Type Utilities
+
+### Dtype
+
+The `Dtype` class represents the data type of an array.
+
+```python
+import mlx.core as mx
+
+a = mx.array([1, 2, 3])
+print(type(a.dtype))  # <class 'mlx.core.Dtype'>
+print(a.dtype)  # mlx.core.int32
+print(a.dtype.size)  # 4
+```
+
+**Attributes:**
+
+<ResponseField name="size" type="int">
+  The size of the data type in bytes.
+</ResponseField>
+
+### DtypeCategory
+
+Data types are arranged in a hierarchy of categories. The `DtypeCategory` class represents these categories.
+
+**Categories:**
+- `complexfloating`: Complex floating point types
+- `floating`: Floating point types
+- `signedinteger`: Signed integer types
+- `unsignedinteger`: Unsigned integer types
+- `inexact`: Floating point and complex types
+- `number`: All numeric types
+- `generic`: All types
+
+```python
+import mlx.core as mx
+
+# Check if a dtype is a floating point type
+print(mx.issubdtype(mx.float32, mx.floating))  # True
+print(mx.issubdtype(mx.int32, mx.floating))  # False
+```
+
+### issubdtype
+
+Determine if one data type is a subtype of another.
+
+```python
+import mlx.core as mx
+
+# Check specific types
+print(mx.issubdtype(mx.float32, mx.floating))  # True
+print(mx.issubdtype(mx.float16, mx.floating))  # True
+print(mx.issubdtype(mx.int32, mx.floating))  # False
+
+# Check categories
+print(mx.issubdtype(mx.float32, mx.inexact))  # True
+print(mx.issubdtype(mx.complex64, mx.inexact))  # True
+print(mx.issubdtype(mx.int32, mx.signedinteger))  # True
+print(mx.issubdtype(mx.uint8, mx.unsignedinteger))  # True
+```
+
+<ParamField path="arg1" type="Dtype | DtypeCategory" required>
+  The data type or category to check.
+</ParamField>
+
+<ParamField path="arg2" type="DtypeCategory" required>
+  The category to check against.
+</ParamField>
+
+<ResponseField name="result" type="bool">
+  True if arg1 is a subtype of arg2, False otherwise.
+</ResponseField>
+
+### finfo
+
+Machine limits for floating point types.
+
+```python
+import mlx.core as mx
+
+info = mx.finfo(mx.float32)
+print(info.min)    # Smallest representable number
+print(info.max)    # Largest representable number
+print(info.eps)    # Smallest representable positive number
+print(info.dtype)  # mlx.core.float32
+```
+
+<ParamField path="dtype" type="Dtype" required>
+  A floating point data type. Raises ValueError for non-floating point types.
+</ParamField>
+
+<ResponseField name="info" type="finfo">
+  An object with the following attributes:
+  - `min`: Smallest representable number
+  - `max`: Largest representable number
+  - `eps`: Machine epsilon (smallest positive number such that 1.0 + eps != 1.0)
+  - `dtype`: The data type
+</ResponseField>
+
+### iinfo
+
+Machine limits for integer types.
+
+```python
+import mlx.core as mx
+
+info = mx.iinfo(mx.int32)
+print(info.min)    # -2147483648
+print(info.max)    # 2147483647
+print(info.dtype)  # mlx.core.int32
+
+info = mx.iinfo(mx.uint8)
+print(info.min)    # 0
+print(info.max)    # 255
+```
+
+<ParamField path="dtype" type="Dtype" required>
+  An integer data type. Raises ValueError for non-integer types.
+</ParamField>
+
+<ResponseField name="info" type="iinfo">
+  An object with the following attributes:
+  - `min`: Smallest representable number
+  - `max`: Largest representable number
+  - `dtype`: The data type
+</ResponseField>
+
+## Type Conversion
+
+Arrays can be converted between types using the `astype` method.
+
+```python
+import mlx.core as mx
+
+# Integer to float
+a = mx.array([1, 2, 3], dtype=mx.int32)
+b = a.astype(mx.float32)
+print(b)  # array([1, 2, 3], dtype=float32)
+
+# Float to integer (truncates)
+c = mx.array([1.7, 2.3, 3.9], dtype=mx.float32)
+d = c.astype(mx.int32)
+print(d)  # array([1, 2, 3], dtype=int32)
+
+# Precision conversion
+e = mx.array([1.234567], dtype=mx.float32)
+f = e.astype(mx.float16)  # Reduced precision
+print(f)
+```
+
+## Type Promotion
+
+When operating on arrays with different types, MLX automatically promotes them to a common type.
+
+```python
+import mlx.core as mx
+
+a = mx.array([1, 2, 3], dtype=mx.int32)
+b = mx.array([1.5, 2.5, 3.5], dtype=mx.float32)
+c = a + b
+print(c.dtype)  # mlx.core.float32 (promoted to float)
+print(c)  # array([2.5, 4.5, 6.5], dtype=float32)
+
+# Integer types promote to larger types
+d = mx.array([1], dtype=mx.int8)
+e = mx.array([1], dtype=mx.int32)
+f = d + e
+print(f.dtype)  # mlx.core.int32
+```
+
+## Data Type Naming
+
+MLX data types follow NumPy naming conventions:
+
+- Boolean: `bool_` (underscore avoids conflict with Python's `bool`)
+- Integers: `int8`, `int16`, `int32`, `int64`
+- Unsigned integers: `uint8`, `uint16`, `uint32`, `uint64`
+- Floats: `float16`, `bfloat16`, `float32`, `float64`
+- Complex: `complex64`
+
+```python
+import mlx.core as mx
+
+print(str(mx.bool_))      # mlx.core.bool
+print(str(mx.int32))      # mlx.core.int32
+print(str(mx.float32))    # mlx.core.float32
+print(str(mx.complex64))  # mlx.core.complex64
+```

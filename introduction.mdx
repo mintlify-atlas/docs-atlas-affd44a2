@@ -1,0 +1,86 @@
+---
+title: Introduction to MLX
+description: An array framework for machine learning on Apple silicon, designed by machine learning researchers for machine learning researchers
+---
+
+# Introduction to MLX
+
+MLX is an array framework for machine learning on Apple silicon, brought to you by Apple machine learning research. The Python API closely follows NumPy with a few powerful extensions, while also providing fully featured C++, C, and Swift APIs.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Familiar APIs" icon="code">
+    Python API closely follows NumPy. Higher-level packages like `mlx.nn` and `mlx.optimizers` mirror PyTorch for building complex models.
+  </Card>
+  
+  <Card title="Composable Transformations" icon="layer-group">
+    Composable function transformations for automatic differentiation, automatic vectorization, and computation graph optimization.
+  </Card>
+  
+  <Card title="Lazy Computation" icon="clock">
+    Computations are lazy - arrays are only materialized when needed, enabling efficient execution.
+  </Card>
+  
+  <Card title="Dynamic Graph Construction" icon="diagram-project">
+    Computation graphs are constructed dynamically. Changing function argument shapes doesn't trigger slow compilations.
+  </Card>
+  
+  <Card title="Multi-Device Support" icon="microchip">
+    Operations can run on CPU or GPU without explicit device management.
+  </Card>
+  
+  <Card title="Unified Memory" icon="memory">
+    Arrays live in shared memory. Perform operations on any device without transferring data.
+  </Card>
+</CardGroup>
+
+## Why MLX?
+
+MLX is designed by machine learning researchers for machine learning researchers. The framework is **user-friendly** yet **efficient** for training and deploying models. The design itself is **conceptually simple**, making it easy to extend and improve with the goal of quickly exploring new ideas.
+
+<Note>
+  MLX's unified memory model is a notable difference from other frameworks. Arrays in MLX live in shared memory, allowing operations on any supported device without data copies.
+</Note>
+
+## Inspired by the Best
+
+The design of MLX draws inspiration from leading frameworks:
+- **NumPy** - Familiar array operations
+- **PyTorch** - Neural network APIs and dynamic graphs
+- **JAX** - Function transformations and composability
+- **ArrayFire** - Multi-device execution
+
+## Get Started
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install MLX on macOS with Apple silicon or Linux with CUDA/CPU support
+  </Card>
+  
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get up and running with your first MLX array and operations
+  </Card>
+  
+  <Card title="Examples" icon="code" href="https://github.com/ml-explore/mlx-examples">
+    Explore LLMs, Stable Diffusion, Whisper, and more in the examples repo
+  </Card>
+  
+  <Card title="API Reference" icon="book" href="/api/array">
+    Dive into the complete Python and C++ API documentation
+  </Card>
+</CardGroup>
+
+## Real-World Examples
+
+The [MLX examples repository](https://github.com/ml-explore/mlx-examples) includes production-ready implementations:
+
+- **Transformer language model** training
+- **LLaMA** inference and **LoRA** finetuning
+- **Stable Diffusion** image generation
+- **Whisper** speech recognition
+- Data and tensor parallelism patterns
+
+## Who Maintains MLX?
+
+MLX was initially developed with equal contribution by Awni Hannun, Jagrit Digani, Angelos Katharopoulos, and Ronan Collobert at Apple machine learning research.

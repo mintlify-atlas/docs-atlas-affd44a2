@@ -1,0 +1,166 @@
+---
+title: Installation
+description: Install MLX on macOS with Apple silicon or Linux with CUDA/CPU support
+---
+
+# Installation
+
+MLX is available on PyPI with platform-specific packages for macOS and Linux. Choose the installation method that matches your platform and requirements.
+
+## macOS (Apple Silicon)
+
+MLX runs natively on Apple silicon Macs using the Metal GPU backend.
+
+### Requirements
+
+- M-series chip (Apple silicon)
+- macOS >= 14.0
+- Python >= 3.10 (native, not x86 via Rosetta)
+
+### Install with pip
+
+<CodeGroup>
+```bash pip
+pip install mlx
+```
+</CodeGroup>
+
+<Note>
+  MLX is only available on devices running macOS 14.0 or higher.
+</Note>
+
+### Verify Python Architecture
+
+Ensure you're using native Python (not running via Rosetta):
+
+```bash
+python -c "import platform; print(platform.processor())"
+```
+
+The output should be `arm`. If it shows `i386`, you're using a non-native Python. Switch to a native Python installation using [Conda](https://stackoverflow.com/q/65415996) or another package manager.
+
+## Linux
+
+MLX supports Linux with CUDA GPU acceleration or CPU-only execution.
+
+### CUDA Backend
+
+For NVIDIA GPUs with CUDA support:
+
+#### Requirements
+
+- NVIDIA architecture >= SM 7.5
+- NVIDIA driver >= 550.54.14
+- CUDA toolkit >= 12.0
+- Linux distribution with glibc >= 2.35
+- Python >= 3.10
+
+#### Install with pip
+
+<CodeGroup>
+```bash CUDA 12
+pip install mlx[cuda12]
+```
+
+```bash CUDA 13
+pip install mlx[cuda13]
+```
+</CodeGroup>
+
+<Warning>
+  CUDA 13 requires an NVIDIA driver >= 580 or an appropriate CUDA compatibility package.
+</Warning>
+
+### CPU-Only Backend
+
+For running MLX on Linux without GPU acceleration:
+
+#### Requirements
+
+- Linux distribution with glibc >= 2.35
+- Python >= 3.10
+
+#### Install with pip
+
+<CodeGroup>
+```bash pip
+pip install mlx[cpu]
+```
+</CodeGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="pip cannot find a matching distribution">
+    If your OS and Python versions meet the requirements but pip still fails, you're likely using a non-native Python.
+    
+    Check your Python architecture:
+    ```bash
+    python -c "import platform; print(platform.processor())"
+    ```
+    
+    On macOS with Apple silicon, this should output `arm`. If it shows `i386`, switch to a native Python installation.
+  </Accordion>
+  
+  <Accordion title="Import error after installation">
+    Ensure you're using Python 3.10 or later:
+    ```bash
+    python --version
+    ```
+    
+    On macOS, verify you're running macOS 14.0 or higher:
+    ```bash
+    sw_vers
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Building from Source
+
+For advanced users who need to build from source, MLX supports custom builds with various configuration options.
+
+### Requirements
+
+- C++ compiler with C++20 support (e.g., Clang >= 15.0)
+- CMake >= 3.25
+- **macOS**: Xcode >= 15.0 with macOS SDK >= 14.0
+- **Linux (CPU)**: BLAS and LAPACK libraries
+- **Linux (CUDA)**: CUDA toolkit and cuDNN
+
+### Clone and Build
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone git@github.com:ml-explore/mlx.git mlx && cd mlx
+    ```
+  </Step>
+  
+  <Step title="Install with pip">
+    For development:
+    ```bash
+    pip install -e ".[dev]"
+    ```
+    
+    For CUDA on Linux:
+    ```bash
+    CMAKE_ARGS="-DMLX_BUILD_CUDA=ON" pip install -e ".[dev]"
+    ```
+  </Step>
+  
+  <Step title="Run tests">
+    ```bash
+    python -m unittest discover python/tests
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  For detailed C++ build instructions and advanced configuration options, see the [Build from Source documentation](https://ml-explore.github.io/mlx/build/html/install.html).
+</Note>
+
+## Next Steps
+
+<Card title="Quick Start Tutorial" icon="rocket" href="/quickstart">
+  Learn how to create your first MLX arrays and perform basic operations
+</Card>

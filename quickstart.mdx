@@ -1,80 +1,209 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get up and running with MLX in minutes
 ---
 
-## Get started in three steps
+This guide will help you get started with MLX by creating arrays, performing operations, and using function transformations.
 
-Get your documentation site running locally and make your first customization.
+## Creating arrays
 
-### Step 1: Set up your local environment
+Import `mlx.core` and create your first array:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+```python
+import mlx.core as mx
 
-### Step 2: Deploy your changes
+# Create arrays
+a = mx.array([1, 2, 3, 4])
+print(a.shape)  # [4]
+print(a.dtype)  # int32
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+b = mx.array([1.0, 2.0, 3.0, 4.0])
+print(b.dtype)  # float32
+```
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+## Lazy evaluation
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+<Note>
+Operations in MLX are lazy. Arrays are only computed when needed.
+</Note>
 
-### Step 3: Go live
+You can force evaluation using `eval()`:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+```python
+c = a + b  # Not evaluated yet
+mx.eval(c)  # Now evaluated
+```
+
+Arrays are automatically evaluated when you:
+- Print them
+- Access scalar values with `.item()`
+- Convert to NumPy arrays
+
+```python
+c = a + b
+print(c)  # Automatically evaluates
+# array([2, 4, 6, 8], dtype=float32)
+
+# Convert to NumPy
+import numpy as np
+np_array = np.array(c)  # Also evaluates
+```
+
+Learn more in the [Lazy Evaluation](/concepts/lazy-evaluation) guide.
+
+## Basic operations
+
+MLX supports standard array operations:
+
+<CodeGroup>
+```python Arithmetic
+import mlx.core as mx
+
+a = mx.array([1, 2, 3])
+b = mx.array([4, 5, 6])
+
+# Element-wise operations
+c = a + b  # [5, 7, 9]
+d = a * b  # [4, 10, 18]
+e = mx.exp(a)  # Exponential
+```
+
+```python Broadcasting
+import mlx.core as mx
+
+a = mx.array([[1, 2, 3], [4, 5, 6]])
+b = mx.array([10, 20, 30])
+
+# Broadcasting
+c = a + b
+# [[11, 22, 33],
+#  [14, 25, 36]]
+```
+
+```python Reductions
+import mlx.core as mx
+
+a = mx.array([[1, 2, 3], [4, 5, 6]])
+
+# Reductions
+total = mx.sum(a)  # 21
+mean = mx.mean(a)  # 3.5
+max_val = mx.max(a, axis=1)  # [3, 6]
+```
+</CodeGroup>
+
+## Function transformations
+
+MLX provides composable function transformations for automatic differentiation and vectorization.
+
+### Automatic differentiation
+
+Compute gradients with `grad()`:
+
+```python
+import mlx.core as mx
+
+x = mx.array(0.0)
+
+# Gradient of sin(x)
+grad_sin = mx.grad(mx.sin)
+print(grad_sin(x))  # 1.0 (cos(0))
+
+# Second derivative
+grad2_sin = mx.grad(mx.grad(mx.sin))
+print(grad2_sin(x))  # -0.0 (-sin(0))
+```
+
+### Value and gradient
+
+Compute both function value and gradient efficiently:
+
+```python
+import mlx.core as mx
+
+def loss_fn(x):
+    return mx.sum(x ** 2)
+
+x = mx.array([1.0, 2.0, 3.0])
+
+# Get both value and gradient
+value, grad = mx.value_and_grad(loss_fn)(x)
+print(value)  # 14.0
+print(grad)   # [2.0, 4.0, 6.0]
+```
+
+### Vectorization
+
+Vectorize functions with `vmap()`:
+
+```python
+import mlx.core as mx
+
+def normalize(x):
+    return x / mx.sum(x)
+
+# Batch of vectors
+batch = mx.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+
+# Vectorize across batch dimension
+batch_normalize = mx.vmap(normalize)
+result = batch_normalize(batch)
+# [[0.333, 0.667],
+#  [0.429, 0.571],
+#  [0.455, 0.545]]
+```
+
+### Composable transformations
+
+Transformations can be composed arbitrarily:
+
+```python
+import mlx.core as mx
+
+# Gradient of vectorized function
+grad_vmap_fn = mx.grad(mx.vmap(some_function))
+
+# Vectorized gradient
+vmap_grad_fn = mx.vmap(mx.grad(some_function))
+
+# Any combination works
+mx.grad(mx.vmap(mx.grad(fn)))
+```
+
+## Multi-device execution
+
+Operations can run on CPU or GPU without copying data:
+
+```python
+import mlx.core as mx
+
+# Arrays live in unified memory
+a = mx.array([1, 2, 3])
+
+# Run on GPU
+b = mx.exp(a, stream=mx.gpu)
+
+# Run on CPU
+c = mx.sin(a, stream=mx.cpu)
+
+# No data transfer needed - unified memory!
+```
+
+Learn more in the [Unified Memory](/concepts/unified-memory) guide.
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Core Concepts" icon="lightbulb" href="/concepts/lazy-evaluation">
+    Understand lazy evaluation, unified memory, and more
+  </Card>
+  <Card title="Examples" icon="code" href="/examples/linear-regression">
+    See complete examples including neural networks
+  </Card>
+  <Card title="Python API" icon="book" href="/api/array">
+    Explore the full API reference
+  </Card>
+  <Card title="Guides" icon="map" href="/guides/indexing">
+    Learn about indexing, NumPy comparison, and more
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

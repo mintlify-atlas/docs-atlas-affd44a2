@@ -1,0 +1,43 @@
+---
+title: Using Streams
+description: Learn how to specify and use streams for controlling operation execution in MLX
+---
+
+All operations in MLX (including random number generation) take an optional keyword argument `stream`. The `stream` kwarg specifies which stream the operation should run on.
+
+## Specifying the Stream
+
+If the stream is unspecified, the operation is run on the default stream of the default device:
+
+```python
+mx.default_stream(mx.default_device())
+```
+
+The `stream` kwarg can also be a `Device` (e.g., `stream=my_device`), in which case the operation is run on the default stream of the provided device:
+
+```python
+mx.default_stream(my_device)
+```
+
+## Example Usage
+
+```python
+import mlx.core as mx
+
+# Create a custom stream
+my_stream = mx.Stream(mx.cpu)
+
+# Run an operation on the custom stream
+result = mx.add(a, b, stream=my_stream)
+
+# Or use a device directly
+result = mx.add(a, b, stream=mx.gpu)
+```
+
+<Note>
+Streams allow for asynchronous execution and can help improve performance by overlapping computation and data transfer.
+</Note>
+
+<Tip>
+When working with multiple devices or optimizing performance, explicitly specifying streams can give you fine-grained control over operation scheduling.
+</Tip>

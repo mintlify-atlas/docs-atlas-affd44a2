@@ -1,0 +1,150 @@
+---
+title: C++ API Overview
+description: Introduction to using MLX with C++ for high-performance machine learning
+---
+
+MLX provides a complete C++ API for high-performance machine learning on Apple Silicon. The C++ API gives you direct access to MLX's core operations and lets you build efficient ML applications without Python overhead.
+
+## Why Use the C++ API?
+
+The C++ API is ideal when you need:
+
+- **Maximum Performance**: Direct C++ access eliminates Python overhead
+- **Standalone Applications**: Build native macOS applications without Python dependencies
+- **Custom Extensions**: Create custom operations and Metal kernels
+- **Integration**: Embed MLX into existing C++ projects
+
+## Core Components
+
+The MLX C++ API is organized into several key namespaces:
+
+```cpp
+#include "mlx/mlx.h"
+
+namespace mx = mlx::core;
+```
+
+### Array Operations
+
+The `mlx::core` namespace contains all core array operations:
+
+- **Array Creation**: `zeros()`, `ones()`, `arange()`, `linspace()`
+- **Array Manipulation**: `reshape()`, `transpose()`, `concatenate()`, `split()`
+- **Mathematical Operations**: `add()`, `multiply()`, `matmul()`, `exp()`, `log()`
+- **Reductions**: `sum()`, `mean()`, `max()`, `min()`
+- **Comparison**: `equal()`, `greater()`, `less()`
+
+### Additional Modules
+
+- **`mlx::core::random`**: Random number generation
+- **`mlx::core::fft`**: Fast Fourier transforms
+- **`mlx::core::linalg`**: Linear algebra operations
+- **`mlx::core::fast`**: Fast custom Metal kernels
+
+## Basic Example
+
+Here's a simple example showing array creation and operations:
+
+```cpp
+#include <iostream>
+#include "mlx/mlx.h"
+
+namespace mx = mlx::core;
+
+int main() {
+  // Create arrays
+  auto x = mx::array({1.0f, 2.0f, 3.0f, 4.0f}, {2, 2});
+  auto y = mx::ones({2, 2});
+  
+  // Perform operations
+  auto z = x + y;
+  
+  // Evaluate (MLX is lazy by default)
+  mx::eval(z);
+  
+  // Print result
+  std::cout << z << std::endl;
+  
+  return 0;
+}
+```
+
+## Key Concepts
+
+### Lazy Evaluation
+
+MLX uses lazy evaluation by default. Operations build a computation graph without executing immediately:
+
+```cpp
+auto z = x + y;  // Graph node created, no computation yet
+mx::eval(z);     // Now the computation runs
+```
+
+Some operations implicitly evaluate arrays:
+- Accessing values with `.item<T>()`
+- Printing arrays with `std::cout`
+
+### Streams and Devices
+
+MLX supports multiple compute devices and streams for parallelism:
+
+```cpp
+// Run on GPU (default)
+auto x = mx::ones({100, 100});
+
+// Run on CPU
+auto y = mx::ones({100, 100}, mx::cpu);
+
+// Explicit stream
+auto s = mx::Stream(mx::Device::gpu);
+auto z = mx::ones({100, 100}, s);
+```
+
+### Data Types
+
+MLX supports various data types:
+
+```cpp
+auto x = mx::array(1, mx::int32);      // 32-bit integer
+auto y = mx::array(1.0f, mx::float32); // 32-bit float
+auto z = mx::array(1.0, mx::float16);  // 16-bit float
+```
+
+Available types: `float32`, `float16`, `bfloat16`, `int32`, `int64`, `int16`, `int8`, `uint32`, `uint64`, `uint16`, `uint8`, `bool_`, `complex64`
+
+## Automatic Differentiation
+
+MLX provides composable function transformations including automatic differentiation:
+
+```cpp
+auto fn = [](mx::array x) { 
+  return mx::square(x); 
+};
+
+// Get gradient function
+auto grad_fn = mx::grad(fn);
+
+// Compute derivative
+auto x = mx::array(1.5);
+auto dfdx = grad_fn(x);  // Returns 2 * x = 3.0
+
+// Higher-order derivatives
+auto d2fdx2 = mx::grad(mx::grad(fn))(x);  // Returns 2.0
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Operations Reference" icon="function" href="/cpp/ops">
+    Complete reference for C++ operations
+  </Card>
+  <Card title="Usage Guide" icon="code" href="/cpp/usage">
+    How to use MLX in C++ projects
+  </Card>
+  <Card title="Building Extensions" icon="puzzle-piece" href="/cpp/extensions">
+    Create custom C++ extensions
+  </Card>
+  <Card title="Metal Kernels" icon="bolt" href="/cpp/metal-kernels">
+    Write custom Metal GPU kernels
+  </Card>
+</CardGroup>

@@ -1,0 +1,356 @@
+---
+title: Using MLX in C++
+description: Guide to integrating MLX into C++ projects with CMake
+---
+
+This guide shows you how to use MLX in a C++ project with CMake.
+
+## Installation
+
+You can install MLX in several ways:
+
+### Install via Python Package
+
+The easiest way is to install the MLX Python package, which includes the C++ libraries:
+
+```bash
+pip install -U mlx
+```
+
+### Build from Source
+
+To build just the C++ library from source, see the [build and install](/install) documentation.
+
+## CMake Project Setup
+
+### Basic Project Structure
+
+Create a project with the following structure:
+
+```
+my_project/
+├── CMakeLists.txt
+└── main.cpp
+```
+
+### Example Program
+
+Create `main.cpp`:
+
+```cpp main.cpp
+#include <iostream>
+#include "mlx/mlx.h"
+
+namespace mx = mlx::core;
+
+int main() {
+  auto x = mx::array({1, 2, 3});
+  auto y = mx::array({1, 2, 3});
+  std::cout << x + y << std::endl;
+  return 0;
+}
+```
+
+### CMakeLists.txt
+
+Create `CMakeLists.txt`:
+
+```cmake CMakeLists.txt
+cmake_minimum_required(VERSION 3.27)
+
+project(my_mlx_project LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find MLX (method depends on installation)
+# See below for details
+
+# Add your executable
+add_executable(my_program main.cpp)
+target_link_libraries(my_program PRIVATE mlx)
+```
+
+## Finding MLX with CMake
+
+The method to find MLX depends on how you installed it.
+
+### If Installed via Python Package
+
+Add this to your `CMakeLists.txt` before `find_package(MLX)`:
+
+```cmake
+find_package(
+  Python 3.9
+  COMPONENTS Interpreter Development.Module
+  REQUIRED)
+  
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -m mlx --cmake-dir
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  OUTPUT_VARIABLE MLX_ROOT)
+
+find_package(MLX CONFIG REQUIRED)
+```
+
+This uses Python to locate the MLX installation directory.
+
+### If Installed to System Path
+
+If you built and installed MLX to a system path (like `/usr/local`), CMake should find it automatically:
+
+```cmake
+find_package(MLX CONFIG REQUIRED)
+```
+
+### If Installed to Custom Location
+
+If you installed MLX to a custom location, set `MLX_ROOT`:
+
+```cmake
+set(MLX_ROOT "/path/to/mlx/installation")
+find_package(MLX CONFIG REQUIRED)
+```
+
+## Building Your Project
+
+<Steps>
+  <Step title="Configure with CMake">
+    Configure the build system:
+    
+    ```bash
+    cmake -B build -DCMAKE_BUILD_TYPE=Release
+    ```
+  </Step>
+  
+  <Step title="Build the project">
+    Compile your program:
+    
+    ```bash
+    cmake --build build
+    ```
+  </Step>
+  
+  <Step title="Run the program">
+    Execute your program:
+    
+    ```bash
+    ./build/my_program
+    ```
+    
+    Expected output:
+    ```
+    array([2, 4, 6], dtype=int32)
+    ```
+  </Step>
+</Steps>
+
+## CMake Variables
+
+When you call `find_package(MLX CONFIG REQUIRED)`, the following CMake variables are set:
+
+| Variable | Description |
+|----------|-------------|
+| `MLX_FOUND` | `TRUE` if MLX is found |
+| `MLX_INCLUDE_DIRS` | Include directories for MLX headers |
+| `MLX_LIBRARIES` | Libraries to link against |
+| `MLX_CXX_FLAGS` | Additional compiler flags |
+| `MLX_BUILD_ACCELERATE` | `TRUE` if MLX was built with Accelerate support |
+| `MLX_BUILD_METAL` | `TRUE` if MLX was built with Metal support |
+
+## Complete Example
+
+Here's a complete working example:
+
+```cpp main.cpp
+#include <iostream>
+#include "mlx/mlx.h"
+
+namespace mx = mlx::core;
+
+int main() {
+  // Create arrays
+  auto x = mx::array({1, 2, 3});
+  auto y = mx::array({1, 2, 3});
+  
+  // Element-wise addition
+  auto z = x + y;
+  
+  // Matrix operations
+  auto A = mx::random::normal({3, 3});
+  auto B = mx::random::normal({3, 3});
+  auto C = mx::matmul(A, B);
+  
+  // Reductions
+  auto sum = mx::sum(C);
+  auto mean = mx::mean(C);
+  
+  std::cout << "Sum: " << sum << std::endl;
+  std::cout << "Mean: " << mean << std::endl;
+  
+  return 0;
+}
+```
+
+```cmake CMakeLists.txt
+cmake_minimum_required(VERSION 3.27)
+
+project(mlx_example LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find Python and MLX
+find_package(
+  Python 3.9
+  COMPONENTS Interpreter Development.Module
+  REQUIRED)
+  
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -m mlx --cmake-dir
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  OUTPUT_VARIABLE MLX_ROOT)
+
+find_package(MLX CONFIG REQUIRED)
+
+# Build executable
+add_executable(mlx_example main.cpp)
+target_link_libraries(mlx_example PRIVATE mlx)
+```
+
+## Linear Regression Example
+
+Here's a more advanced example showing a complete linear regression implementation:
+
+```cpp linear_regression.cpp
+#include <iostream>
+#include <cmath>
+#include "mlx/mlx.h"
+
+namespace mx = mlx::core;
+
+int main() {
+  int num_features = 100;
+  int num_examples = 1000;
+  int num_iters = 10000;
+  float learning_rate = 0.01;
+  
+  // True parameters
+  auto w_star = mx::random::normal({num_features});
+  
+  // Input examples (design matrix)
+  auto X = mx::random::normal({num_examples, num_features});
+  
+  // Noisy labels
+  auto eps = 1e-2 * mx::random::normal({num_examples});
+  auto y = mx::matmul(X, w_star) + eps;
+  
+  // Initialize random parameters
+  mx::array w = 1e-2 * mx::random::normal({num_features});
+  
+  // Loss function
+  auto loss_fn = [&](mx::array w) {
+    auto yhat = mx::matmul(X, w);
+    return (0.5f / num_examples) * mx::sum(mx::square(yhat - y));
+  };
+  
+  // Gradient function
+  auto grad_fn = mx::grad(loss_fn);
+  
+  // Training loop
+  for (int it = 0; it < num_iters; ++it) {
+    auto grads = grad_fn(w);
+    w = w - learning_rate * grads;
+    mx::eval(w);
+  }
+  
+  auto loss = loss_fn(w);
+  auto error_norm = std::sqrt(mx::sum(mx::square(w - w_star)).item<float>());
+  
+  std::cout << "Loss: " << loss << std::endl;
+  std::cout << "|w - w*| = " << error_norm << std::endl;
+  
+  return 0;
+}
+```
+
+## Key Patterns
+
+### Lazy Evaluation
+
+MLX uses lazy evaluation. Call `mx::eval()` to execute:
+
+```cpp
+auto z = x + y;  // Builds computation graph
+mx::eval(z);     // Executes computation
+```
+
+### Lambda Functions
+
+Use lambdas for function transformations:
+
+```cpp
+auto fn = [](mx::array x) {
+  return mx::square(x);
+};
+
+auto grad_fn = mx::grad(fn);
+auto derivative = grad_fn(mx::array(2.0));  // Returns 4.0
+```
+
+### Namespace Alias
+
+Always use a namespace alias for cleaner code:
+
+```cpp
+namespace mx = mlx::core;
+
+// Instead of:
+auto x = mlx::core::ones({3, 3});
+
+// Write:
+auto x = mx::ones({3, 3});
+```
+
+## Common Issues
+
+### CMake Can't Find MLX
+
+If CMake can't find MLX, try:
+
+1. Check that MLX is installed: `python -c "import mlx.core"`
+2. Verify the Python path: `python -m mlx --cmake-dir`
+3. Explicitly set `MLX_ROOT` in CMakeLists.txt
+
+### Link Errors
+
+If you get undefined symbols:
+
+1. Make sure you're using C++20 or later
+2. Check that you linked with `target_link_libraries(... PRIVATE mlx)`
+3. Verify MLX was built with Metal support on macOS
+
+### Runtime Errors
+
+If you get runtime errors:
+
+1. Make sure to call `mx::eval()` on arrays before accessing data
+2. Check array shapes match for operations
+3. Verify data types are compatible
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Operations Reference" icon="function" href="/cpp/ops">
+    See all available C++ operations
+  </Card>
+  <Card title="Build Extensions" icon="puzzle-piece" href="/cpp/extensions">
+    Create custom operations in C++
+  </Card>
+  <Card title="Metal Kernels" icon="bolt" href="/cpp/metal-kernels">
+    Write custom GPU kernels
+  </Card>
+  <Card title="Examples" icon="code" href="https://github.com/ml-explore/mlx/tree/main/examples/cpp">
+    Browse more C++ examples
+  </Card>
+</CardGroup>
