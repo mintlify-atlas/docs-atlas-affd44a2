@@ -1,0 +1,153 @@
+{
+  "projectType": "ai-ml",
+  "projectName": "MLX",
+  "projectDescription": "An array framework for machine learning on Apple silicon with NumPy-like APIs and composable function transformations.",
+  "theme": "aspen",
+  "primaryColor": "#7B61FF",
+  "lightColor": "#A48FFF",
+  "darkColor": "#5E47CC",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/lazy-evaluation",
+              "concepts/unified-memory",
+              "concepts/function-transforms",
+              "concepts/compilation"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/indexing",
+              "guides/numpy-comparison",
+              "guides/saving-loading",
+              "guides/streams",
+              "guides/distributed",
+              "guides/export"
+            ]
+          },
+          {
+            "group": "Examples",
+            "pages": [
+              "examples/linear-regression",
+              "examples/neural-network",
+              "examples/llama-inference",
+              "examples/data-parallelism",
+              "examples/tensor-parallelism"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Python API",
+        "groups": [
+          {
+            "group": "Core",
+            "pages": [
+              "api/array",
+              "api/data-types",
+              "api/devices-streams",
+              "api/ops"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "api/random",
+              "api/fft",
+              "api/linalg",
+              "api/transforms"
+            ]
+          },
+          {
+            "group": "Neural Networks",
+            "pages": [
+              "api/nn",
+              "api/optimizers"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "api/fast",
+              "api/distributed",
+              "api/export",
+              "api/metal",
+              "api/cuda",
+              "api/memory",
+              "api/tree-utils"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "C++ API",
+        "groups": [
+          {
+            "group": "Reference",
+            "pages": [
+              "cpp/overview",
+              "cpp/ops"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "cpp/usage",
+              "cpp/extensions",
+              "cpp/metal-kernels"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "NumPy-like array operations with lazy evaluation",
+    "Composable function transformations (grad, vmap, jvp, vjp)",
+    "Unified memory model - no data copies between CPU and GPU",
+    "Multi-device support (CPU, GPU, Metal, CUDA)",
+    "PyTorch-like neural network API (mlx.nn, mlx.optimizers)",
+    "Dynamic graph construction without recompilation",
+    "Multi-language support (Python, C++, Swift, C)",
+    "Distributed training capabilities"
+  ],
+  "publicApiSurface": [
+    "mlx.core.array",
+    "mlx.core.grad",
+    "mlx.core.vmap",
+    "mlx.core.vjp",
+    "mlx.core.jvp",
+    "mlx.core.value_and_grad",
+    "mlx.core.compile",
+    "mlx.core.eval",
+    "mlx.nn.Module",
+    "mlx.nn.Linear",
+    "mlx.nn.Conv1d",
+    "mlx.nn.Conv2d",
+    "mlx.nn.ReLU",
+    "mlx.nn.losses",
+    "mlx.optimizers.SGD",
+    "mlx.optimizers.Adam",
+    "mlx.optimizers.AdamW",
+    "mlx.random.normal",
+    "mlx.random.uniform",
+    "mlx.linalg.matmul",
+    "mlx.fft.fft",
+    "mlx.distributed.init",
+    "mlx.export.export"
+  ]
+}
